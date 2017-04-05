@@ -45,7 +45,7 @@ void setup()
 
   // set the initial time here:
   // DS3231 seconds, minutes, hours, day, date, month, year
-  setDS3231time(00,06,14,7,01,04,17);
+  //setDS3231time(00,51,20,7,04,04,17);
 
   lcd.begin(16,2);   // initialize the lcd for 16 chars 2 lines, turn on backlight
 
