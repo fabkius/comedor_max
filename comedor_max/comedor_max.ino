@@ -39,13 +39,13 @@ void setup()
   pinMode (IN3, OUTPUT);    // Input3 conectada al pin 5
 
   myservo.attach(9);  // attaches the servo on pin 9 to the servo object    
-  myservo.write(80);
+  myservo.write(65);
 
   pinMode(buttonPin, INPUT);
 
   // set the initial time here:
   // DS3231 seconds, minutes, hours, day, date, month, year
-  //setDS3231time(00,51,20,7,04,04,17);
+  //setDS3231time(00,28,18,7,11,4,17);
 
   lcd.begin(16,2);   // initialize the lcd for 16 chars 2 lines, turn on backlight
 
@@ -201,12 +201,12 @@ void imprimeLcdserial(byte second,byte minute,byte hour,byte dayOfWeek,byte dayO
 
 void abrePuerta(){
   myservo.write(140);
-  delay(900);
+  delay(1000);
 }
 
 void cierraPuerta(){
-  myservo.write(80);
-  delay(900);
+  myservo.write(65);
+  delay(800);
 }
 
 void virarOn(){
@@ -216,7 +216,7 @@ void virarOn(){
   delay(4000);
   // Motor no gira
   digitalWrite (IN4, LOW); 
-  delay(500);
+  delay(300);
   // Motor gira en sentido inverso
   digitalWrite (IN3, HIGH);
   delay(4000);
