@@ -7,6 +7,9 @@ LiquidCrystal_I2C lcd(0x3F, 2, 1, 0, 4, 5, 6, 7, 3, POSITIVE);  // Set the LCD I
 
 Servo myservo;
 
+//sin usar
+int timbre = 13; 
+
 int IN3 = 4; 
 int IN4 = 5;
 
@@ -26,8 +29,8 @@ byte bcdToDec(byte val)
 {
   return( (val/16*10) + (val%16) );
 }
-void setup()
-{
+void setup(){
+
   Wire.begin();
   Serial.begin(9600);
 
@@ -45,7 +48,7 @@ void setup()
 
   // set the initial time here:
   // DS3231 seconds, minutes, hours, day, date, month, year
-  //setDS3231time(00,28,18,7,11,4,17);
+  //setDS3231time(00,46,18,7,15,4,17);
 
   lcd.begin(16,2);   // initialize the lcd for 16 chars 2 lines, turn on backlight
 
@@ -68,6 +71,7 @@ void setup()
   lcd.print("Iniciando...");
   delay(3000);
   lcd.clear();
+
 }
 void setDS3231time(byte second, byte minute, byte hour, byte dayOfWeek, byte
 dayOfMonth, byte month, byte year)
@@ -141,6 +145,7 @@ void loop(){
     abrePuerta();
     vibrarOff();
     cierraPuerta();
+    descargas=0;
   }
 
   lcd.setCursor(0,1);
@@ -226,4 +231,6 @@ void vibrarOff(){
   // Motor no gira
   digitalWrite (IN3, LOW); 
 }
+
+
 
