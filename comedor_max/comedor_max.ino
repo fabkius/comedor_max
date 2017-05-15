@@ -7,9 +7,6 @@ LiquidCrystal_I2C lcd(0x3F, 2, 1, 0, 4, 5, 6, 7, 3, POSITIVE);  // Set the LCD I
 
 Servo myservo;
 
-//sin usar
-int timbre = 13; 
-
 int IN3 = 4; 
 int IN4 = 5;
 
@@ -17,6 +14,8 @@ int descargas;
 
 const int buttonPin = 10;     // the number of the pushbutton pin
 int buttonState = 0;         // variable for reading the pushbutton status
+
+boolean statusUpdate=true;
 
 
 // Convert normal decimal numbers to binary coded decimal
@@ -48,7 +47,7 @@ void setup(){
 
   // set the initial time here:
   // DS3231 seconds, minutes, hours, day, date, month, year
-  //setDS3231time(00,46,18,7,15,4,17);
+  //setDS3231time(00,55,20,7,14,5,17);
 
   lcd.begin(16,2);   // initialize the lcd for 16 chars 2 lines, turn on backlight
 
@@ -112,6 +111,7 @@ void loop(){
 
   imprimeLcdserial(second,minute,hour,dayOfWeek,dayOfMonth,month,year);
 
+  
   buttonState = digitalRead(buttonPin);
   Serial.println("STATE:");
   Serial.println(buttonState);
@@ -138,6 +138,7 @@ void loop(){
     vibrarOff();
     cierraPuerta();
     descargas++;
+    statusUpdate=true;
   }
 
   if(buttonState == HIGH){
@@ -148,6 +149,8 @@ void loop(){
     descargas=0;
   }
 
+  actualizarHora(second,minute,hour,dayOfWeek,dayOfMonth,month,year);
+
   lcd.setCursor(0,1);
   lcd.print("N-Descarga:");
   lcd.print(" ");
@@ -157,6 +160,15 @@ void loop(){
     lcd.print(descargas);
   }
   
+}
+
+void actualizarHora (byte second,byte minute,byte hour,byte dayOfWeek,byte dayOfMonth,byte month,byte year){
+  if(statusUpdate){
+    if(hour==23 && minute==59 && second==00){
+       setDS3231time(second,minute-10,hour,dayOfWeek,dayOfMonth,month,year);
+       statusUpdate=false;
+    }
+  }
 }
 
 
@@ -206,12 +218,12 @@ void imprimeLcdserial(byte second,byte minute,byte hour,byte dayOfWeek,byte dayO
 
 void abrePuerta(){
   myservo.write(140);
-  delay(1000);
+  delay(1100);
 }
 
 void cierraPuerta(){
   myservo.write(65);
-  delay(800);
+  delay(700);
 }
 
 void virarOn(){
