@@ -15,9 +15,6 @@ int descargas;
 const int buttonPin = 10;     // the number of the pushbutton pin
 int buttonState = 0;         // variable for reading the pushbutton status
 
-boolean statusUpdate=true;
-
-
 // Convert normal decimal numbers to binary coded decimal
 byte decToBcd(byte val)
 {
@@ -47,7 +44,7 @@ void setup(){
 
   // set the initial time here:
   // DS3231 seconds, minutes, hours, day, date, month, year
-  //setDS3231time(00,55,20,7,14,5,17);
+  //setDS3231time(00,32,17,7,28,5,17);
 
   lcd.begin(16,2);   // initialize the lcd for 16 chars 2 lines, turn on backlight
 
@@ -65,7 +62,7 @@ void setup(){
 //-------- Write characters on the display ------------------
 // NOTE: Cursor Position: (CHAR, LINE) start at 0  
   lcd.setCursor(0,0); //Start at character 4 on line 0
-  lcd.print("Comedor Max v1.4");
+  lcd.print("Comedor Max v1.5");
   lcd.setCursor(0,1); //Start at character 4 on line 0
   lcd.print("Iniciando...");
   delay(3000);
@@ -117,38 +114,22 @@ void loop(){
   Serial.println(buttonState);
   
   if(hour==9 && minute==00 && second==00){
-    virarOn();
-    abrePuerta();
-    vibrarOff();
-    cierraPuerta();
-    descargas++;
+    ejecutar(descargas);
   }
   
    if(hour==14 && minute==00 && second==00){
-    virarOn();
-    abrePuerta();
-    vibrarOff();
-    cierraPuerta();
-    descargas++;
+    ejecutar(descargas);
   }
 
    if(hour==20 && minute==00 && second==00){
-    virarOn();
-    abrePuerta();
-    vibrarOff();
-    cierraPuerta();
-    descargas++;
-    statusUpdate=true;
+     ejecutar(descargas);
   }
 
   if(buttonState == HIGH){
-    virarOn();
-    abrePuerta();
-    vibrarOff();
-    cierraPuerta();
+    ejecutar(descargas);
     descargas=0;
   }
-
+  
   actualizarHora(second,minute,hour,dayOfWeek,dayOfMonth,month,year);
 
   lcd.setCursor(0,1);
@@ -162,13 +143,34 @@ void loop(){
   
 }
 
-void actualizarHora (byte second,byte minute,byte hour,byte dayOfWeek,byte dayOfMonth,byte month,byte year){
-  if(statusUpdate){
-    if(hour==23 && minute==59 && second==00){
-       setDS3231time(second,minute-10,hour,dayOfWeek,dayOfMonth,month,year);
-       statusUpdate=false;
+  void ejecutar(int count){
+    if(count<=5){
+      ejecuteNormal();
+    }else{
+      ejecuteSpecial();
     }
   }
+
+  void ejecuteNormal(){
+    virarOn();
+    abrePuerta();
+    cierraPuerta();
+    vibrarOff();
+    descargas++;
+  }
+
+  void ejecuteSpecial(){
+    virarLongOn();
+    abreSlowPuerta();
+    cierraPuerta();
+    vibrarOff();
+    descargas++;
+  }
+
+void actualizarHora (byte second,byte minute,byte hour,byte dayOfWeek,byte dayOfMonth,byte month,byte year){
+    if(hour==23 && minute==40 && second==00){
+       setDS3231time(second,minute+12,hour,dayOfWeek,dayOfMonth,month,year);
+    }
 }
 
 
@@ -218,25 +220,43 @@ void imprimeLcdserial(byte second,byte minute,byte hour,byte dayOfWeek,byte dayO
 
 void abrePuerta(){
   myservo.write(140);
-  delay(1100);
+  delay(1400);
+}
+
+void abreSlowPuerta(){
+  myservo.write(140);
+  delay(2000);
 }
 
 void cierraPuerta(){
   myservo.write(65);
-  delay(700);
+  delay(900);
 }
 
 void virarOn(){
    // Motor gira en un sentido
   digitalWrite (IN4, HIGH);
   digitalWrite (IN3, LOW); 
-  delay(4000);
+  delay(6000);
   // Motor no gira
   digitalWrite (IN4, LOW); 
   delay(300);
   // Motor gira en sentido inverso
   digitalWrite (IN3, HIGH);
-  delay(4000);
+  delay(6000);
+}
+
+void virarLongOn(){
+   // Motor gira en un sentido
+  digitalWrite (IN4, HIGH);
+  digitalWrite (IN3, LOW); 
+  delay(10000);
+  // Motor no gira
+  digitalWrite (IN4, LOW); 
+  delay(300);
+  // Motor gira en sentido inverso
+  digitalWrite (IN3, HIGH);
+  delay(10000);
 }
 
 void vibrarOff(){
