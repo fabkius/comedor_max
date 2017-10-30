@@ -1,19 +1,17 @@
 #include "Wire.h"
 #define DS3231_I2C_ADDRESS 0x68
-#include <LiquidCrystal_I2C.h>
-#include <Servo.h>    
+#include <LiquidCrystal_I2C.h>   
 
 LiquidCrystal_I2C lcd(0x3F, 2, 1, 0, 4, 5, 6, 7, 3, POSITIVE);  // Set the LCD I2C address
 
-Servo myservo;
 
 int IN3 = 4; 
 int IN4 = 5;
 
-int descargas;
+int descargas=0;
 
-const int buttonPin = 10;     // the number of the pushbutton pin
-int buttonState = 0;         // variable for reading the pushbutton status
+const int buttonPin = 2;
+int buttonState = 0;
 
 // Convert normal decimal numbers to binary coded decimal
 byte decToBcd(byte val)
@@ -29,22 +27,16 @@ void setup(){
 
   Wire.begin();
   Serial.begin(9600);
-
-  //contador de descargas de comida
-  descargas=0;
   
   //motor
   pinMode (IN4, OUTPUT);    // Input4 conectada al pin 4 
   pinMode (IN3, OUTPUT);    // Input3 conectada al pin 5
 
-  myservo.attach(9);  // attaches the servo on pin 9 to the servo object    
-  myservo.write(65);
-
   pinMode(buttonPin, INPUT);
 
   // set the initial time here:
   // DS3231 seconds, minutes, hours, day, date, month, year
-  //setDS3231time(00,32,17,7,28,5,17);
+  //setDS3231time(00,57,21,7,29,10,17);
 
   lcd.begin(16,2);   // initialize the lcd for 16 chars 2 lines, turn on backlight
 
@@ -62,7 +54,7 @@ void setup(){
 //-------- Write characters on the display ------------------
 // NOTE: Cursor Position: (CHAR, LINE) start at 0  
   lcd.setCursor(0,0); //Start at character 4 on line 0
-  lcd.print("Comedor Max v1.5");
+  lcd.print("Comedor Max v2.1");
   lcd.setCursor(0,1); //Start at character 4 on line 0
   lcd.print("Iniciando...");
   delay(3000);
@@ -107,69 +99,44 @@ void loop(){
   &year);
 
   imprimeLcdserial(second,minute,hour,dayOfWeek,dayOfMonth,month,year);
-
   
   buttonState = digitalRead(buttonPin);
-  Serial.println("STATE:");
-  Serial.println(buttonState);
+
   
-  if(hour==9 && minute==00 && second==00){
-    ejecutar(descargas);
+  if(hour==8 && minute==30 && second==00){
+    ejecutar();
   }
   
-   if(hour==14 && minute==00 && second==00){
-    ejecutar(descargas);
+   if(hour==13 && minute==59 && second==00){
+    ejecutar();
   }
 
-   if(hour==20 && minute==00 && second==00){
-     ejecutar(descargas);
+   if(hour==18 && minute==59 && second==00){
+     ejecutar();
   }
 
   if(buttonState == HIGH){
-    ejecutar(descargas);
-    descargas=0;
+      ejecutar();
+      descargas=0;
   }
-  
+
   actualizarHora(second,minute,hour,dayOfWeek,dayOfMonth,month,year);
 
   lcd.setCursor(0,1);
-  lcd.print("N-Descarga:");
+  lcd.print("Descargas:");
   lcd.print(" ");
-  if(descargas>=9){
-     lcd.print("Empy");
-  }else{
-    lcd.print(descargas);
-  }
-  
+  lcd.print(descargas);  
 }
 
-  void ejecutar(int count){
-    if(count<=5){
-      ejecuteNormal();
-    }else{
-      ejecuteSpecial();
-    }
-  }
-
-  void ejecuteNormal(){
-    virarOn();
-    abrePuerta();
-    cierraPuerta();
-    vibrarOff();
-    descargas++;
-  }
-
-  void ejecuteSpecial(){
-    virarLongOn();
-    abreSlowPuerta();
-    cierraPuerta();
-    vibrarOff();
+  void ejecutar(){
+    GiraOn();
+    GiraOff();
     descargas++;
   }
 
 void actualizarHora (byte second,byte minute,byte hour,byte dayOfWeek,byte dayOfMonth,byte month,byte year){
-    if(hour==23 && minute==40 && second==00){
-       setDS3231time(second,minute+12,hour,dayOfWeek,dayOfMonth,month,year);
+    if(hour==23 && minute==30 && second==00){
+       setDS3231time(second,minute+5,hour,dayOfWeek,dayOfMonth,month,year);
     }
 }
 
@@ -218,50 +185,18 @@ void imprimeLcdserial(byte second,byte minute,byte hour,byte dayOfWeek,byte dayO
   Serial.print(" Day of week: ");
 }
 
-void abrePuerta(){
-  myservo.write(140);
-  delay(1400);
-}
 
-void abreSlowPuerta(){
-  myservo.write(140);
-  delay(2000);
-}
 
-void cierraPuerta(){
-  myservo.write(65);
-  delay(900);
-}
-
-void virarOn(){
+void GiraOn(){
    // Motor gira en un sentido
   digitalWrite (IN4, HIGH);
   digitalWrite (IN3, LOW); 
-  delay(6000);
-  // Motor no gira
-  digitalWrite (IN4, LOW); 
-  delay(300);
-  // Motor gira en sentido inverso
-  digitalWrite (IN3, HIGH);
-  delay(6000);
+  delay(15000);
 }
 
-void virarLongOn(){
-   // Motor gira en un sentido
-  digitalWrite (IN4, HIGH);
-  digitalWrite (IN3, LOW); 
-  delay(10000);
+void GiraOff(){
   // Motor no gira
   digitalWrite (IN4, LOW); 
-  delay(300);
-  // Motor gira en sentido inverso
-  digitalWrite (IN3, HIGH);
-  delay(10000);
-}
-
-void vibrarOff(){
-  // Motor no gira
-  digitalWrite (IN3, LOW); 
 }
 
 
